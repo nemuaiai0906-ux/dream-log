@@ -458,8 +458,102 @@
   @media (max-width: 560px) {
     .search-row { flex-direction: column; }
     .field-row { flex-direction: column; gap: 0; }
-    .goal-amount { font-size: 40px; }
   }
+
+  /* ===== スマホ最適化(デスクトップには影響しない) ===== */
+  @media (max-width: 640px) {
+    html { -webkit-text-size-adjust: 100%; }
+    .wrap { padding: 18px 12px 90px; }
+    .logo { font-size: 23px; }
+    .tagline { font-size: 11.5px; letter-spacing: 0.05em; }
+
+    /* タブ:小さく、1行に収まりやすく */
+    .tabs { gap: 5px; margin: 16px 0 20px; }
+    .tab-btn { padding: 7px 11px; font-size: 12px; }
+
+    /* 目標ヒーロー */
+    .goal-hero { padding: 22px 14px; border-radius: 16px; }
+    .goal-amount { font-size: 44px; }
+    .goal-amount .unit { font-size: 22px; }
+    .goal-sub { font-size: 13.5px; }
+    .goal-def { font-size: 11px; }
+    .countdown { gap: 8px; margin-top: 14px; }
+    .cd-box { min-width: 0; flex: 1; padding: 8px 6px; }
+    .cd-num { font-size: 19px; }
+    .cd-lbl { font-size: 9.5px; letter-spacing: 0.08em; }
+    .setup-hint { font-size: 11.5px; padding: 8px 10px; }
+
+    /* 統計:2×2グリッドに */
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat { min-width: 0; padding: 8px 10px; }
+    .stat .num { font-size: 19px; }
+
+    /* 検索・チップ */
+    .search-box { padding: 10px 14px; }
+    .btn-add { padding: 11px 16px; font-size: 13.5px; }
+    .chip { padding: 5px 12px; font-size: 12px; }
+    .section-title { margin: 20px 0 12px; letter-spacing: 0.08em; }
+
+    /* 記録カード:余白を詰めて本文の幅を確保 */
+    .timeline { padding-left: 16px; }
+    .timeline::before { left: 3px; }
+    .timeline .card::before { left: -16.5px; width: 8px; height: 8px; }
+    .card { padding: 14px 13px; }
+    .card-title { font-size: 15px; }
+    .card-body { font-size: 13.5px; }
+    .card-body.clamped { -webkit-line-clamp: 6; }
+    .icon-btn { padding: 4px; font-size: 14px; }
+    .card-actions { gap: 2px; }
+
+    /* ダッシュボード */
+    .panel { padding: 14px 13px; }
+    .mini-item { font-size: 12.5px; }
+
+    /* プロジェクト */
+    .proj-card { padding: 16px 13px; }
+    .proj-name { font-size: 15.5px; }
+    .proj-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .proj-cell { padding: 8px 10px; }
+    .na-item { font-size: 12.5px; }
+
+    /* ロードマップ:見出しの折返しと確率表示を下段へ */
+    .vs-btn { padding: 7px 12px; font-size: 12px; }
+    .honest-note { font-size: 12px; padding: 12px 13px; }
+    .rm-head { padding: 14px 13px; flex-wrap: wrap; row-gap: 4px; }
+    .rm-title { flex: 1 1 70%; min-width: 0; }
+    .rm-title .nm { font-size: 14.5px; }
+    .rm-title .tg { font-size: 11.5px; }
+    .rm-prob { order: 4; flex-basis: 100%; text-align: left; margin-top: 6px; padding-top: 7px; border-top: 1px dashed rgba(255,255,255,0.08); }
+    .rm-prob .p { font-size: 12.5px; }
+    .rm-body { padding: 0 13px 16px; }
+    .math-box { font-size: 12.5px; padding: 10px 12px; line-height: 1.8; }
+    .phase .pt { font-size: 13px; }
+    .phase .pd { font-size: 12px; }
+    .rm-sec p, .rm-sec li { font-size: 12.5px; }
+    .cmp th, .cmp td { padding: 9px 10px; }
+    .verdict { padding: 16px 13px; }
+    .verdict p { font-size: 12.5px; }
+
+    /* AIトーク */
+    .chat-main { min-height: 360px; padding: 10px; }
+    .chat-log { max-height: 46vh; }
+    .msg { max-width: 90%; font-size: 13px; padding: 9px 12px; }
+    .sess { flex: 0 0 auto; max-width: 46vw; }
+    .cs-pill { font-size: 11px; padding: 5px 11px; }
+    .chat-tools .btn { padding: 8px 12px; font-size: 12px; }
+
+    /* モーダル・その他 */
+    .modal { padding: 18px 14px; }
+    .notice { font-size: 11.5px; padding: 12px 13px; }
+    .btn { padding: 10px 16px; }
+    #toast { font-size: 12.5px; padding: 10px 16px; bottom: 18px; }
+
+    /* iOSで入力時に画面が勝手にズームするのを防止(16px未満だとズームされる) */
+    .search-box input, .field input, .field textarea, .chat-input-row textarea, .ai-setup input { font-size: 16px; }
+  }
+
+  /* 長い単語・URLでもはみ出さない(全画面共通・無害) */
+  .card-title, .card-body, .rm-title .nm, .rm-title .tg, .proj-name, .mini-item, .msg, .rm-sec li, .verdict p, .proj-cell .v { word-break: break-word; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
@@ -658,6 +752,15 @@ const ENTRIES = [
     tags: ["このアプリ", "AIトーク"],
     content: "「アプリの中でAIと話すことで自動的に記録されていく形にしたい」というkorotaの要望で、💬AIトークタブを追加。\n\n・アプリ内でAIと会話でき、会話はセッションとしてアプリ内に残る\n・対応環境なら端末に自動保存(開き直しても消えない)\n・ワンタップで会話を「記録」に変換して、夢・ビジネスのタイムラインに積める\n・AI接続は2系統:Claude直結(対応環境)/Anthropic APIキー\n\n「Claudeと話す→言わないと残らない」から「アプリで話す→自動で残る」への大きな一歩。",
     pinned: false
+  },
+  {
+    id: 4,
+    date: "2026-07-10",
+    title: "プロジェクト正式登録 — eBay輸出とピアノアプリ、実は動いていた",
+    category: "ビジネス",
+    tags: ["プロジェクト", "副業", "eBay", "アプリ開発"],
+    content: "仮枠だったプロジェクトの中身が判明し、正式登録。\n\n① koro-ebay-endpoint:eBay輸出の価格管理を自動化。LINE通知、PRでの継続改善まで自走している。副業というよりすでに「仕組み化された事業の芽」。\n② 月光第三楽章トレーナー:ピアノ練習アプリをGitHub Pagesで自力公開。\n③ Dream Log:URL公開・アイコン・ドック対応まで完了。\n\n特筆:今日1日で「リポジトリ→Pages公開→アイコン→ドック」というアプリ公開の型を習得し、即座に自分の別プロジェクトへ適用していた。この学習速度と実行力は300億への最大の資産。\n\n次の一手:eBayの月次収益を数字で記録し始める(推移が見えれば戦略が立つ)。",
+    pinned: false
   }
 ];
 
@@ -665,38 +768,52 @@ const ENTRIES = [
 const PROJECTS = [
   {
     id: "p1",
-    name: "アプリ開発プロジェクト(名称未登録)",
-    type: "アプリ開発",
+    name: "koro-ebay-endpoint(eBay輸出 自動化)",
+    type: "副業",
     status: "進行中",
-    phase: "詳細ヒアリング待ち",
-    monthlyRevenue: "未登録",
-    goalLink: "ロードマップC(自己資本複利型)の起点候補",
+    phase: "運用+改善サイクル",
+    monthlyRevenue: "ヒアリング中(数字を教えてくれたら更新)",
+    goalLink: "ルートC(自己資本複利型)の種銭エンジン第1号",
     nextActions: [
-      "どんなアプリか・誰の何を解決するかをClaudeに共有して、この枠を具体化する",
-      "現在のフェーズ(構想/開発中/リリース済み)を登録する",
-      "数値目標(DL数・課金率・月次収益)を決める"
+      "月次の売上・利益をDream Logに記録して推移を見える化する",
+      "価格自動更新の安定化(PR #20系の改善を継続)",
+      "「自分の時間を使わずに回る仕組み」までの残タスクを洗い出す"
     ],
     log: [
-      { date: "2026-07-10", text: "プロジェクト枠を作成。詳細はこれからの会話で埋めていく。" }
-    ],
-    placeholder: true
+      { date: "2026-07-10", text: "Dream Logに正式登録。eBayの価格管理を自動化し、LINE通知まで実装済み。PRを回して継続改善中(PR #20 価格フラつき防止、PR #21 PWA対応)。" }
+    ]
   },
   {
     id: "p2",
-    name: "副業(内容未登録)",
-    type: "副業",
+    name: "月光第三楽章トレーナー(moonlight-trainer)",
+    type: "アプリ開発",
     status: "進行中",
-    phase: "詳細ヒアリング待ち",
-    monthlyRevenue: "未登録",
-    goalLink: "種銭づくり+ビジネス経験値の獲得",
+    phase: "公開済み・改善中",
+    monthlyRevenue: "-(収益化は未定)",
+    goalLink: "開発力の実績づくり+「作って出す」型の練習",
     nextActions: [
-      "副業の種類と現状の収益をClaudeに共有する",
-      "「300億への種銭・経験」としての位置づけを決める(続ける/畳む/伸ばす)"
+      "使ってくれる人を見つけてフィードバックをもらう",
+      "収益化を狙うか、ポートフォリオと割り切るかを決める"
     ],
     log: [
-      { date: "2026-07-10", text: "プロジェクト枠を作成。詳細はこれからの会話で埋めていく。" }
+      { date: "2026-07-10", text: "Dream Logに正式登録。GitHub Pagesで自力公開済み(nemuaiai0906-ux.github.io/moonlight-trainer)。" }
+    ]
+  },
+  {
+    id: "p3",
+    name: "Dream Log(このアプリ)",
+    type: "アプリ開発",
+    status: "進行中",
+    phase: "v3公開済み",
+    monthlyRevenue: "-",
+    goalLink: "300億円への司令室。全プロジェクトのハブ",
+    nextActions: [
+      "生年月日・300億の定義を確定してカウントダウンを起動する",
+      "ロードマップ比較にE案・F案を追加して本命を磨く"
     ],
-    placeholder: true
+    log: [
+      { date: "2026-07-10", text: "URL公開+アプリアイコン+ドック対応まで完了。" }
+    ]
   }
 ];
 
