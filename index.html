@@ -378,6 +378,15 @@
   .msg.ai { align-self: flex-start; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: #d4d6e3; border-bottom-left-radius: 4px; }
   .msg.err { align-self: center; background: rgba(232,106,106,0.1); color: var(--danger); font-size: 12px; }
   .chat-empty { color: var(--text-faint); font-size: 13px; text-align: center; margin: auto; line-height: 2; }
+  .chat-notice { align-self: stretch; margin: auto 0; background: rgba(124,108,240,0.07); border: 1px solid rgba(124,108,240,0.28); border-radius: 12px; padding: 14px 15px; }
+  .chat-notice .cn-title { font-size: 14px; font-weight: 700; color: #c9c0ff; margin-bottom: 8px; }
+  .chat-notice p { font-size: 12.5px; color: var(--text-dim); line-height: 1.75; margin-bottom: 8px; }
+  .chat-notice .cn-list { margin: 6px 0 10px; padding-left: 18px; }
+  .chat-notice .cn-list li { font-size: 12.5px; color: #c6c9d9; line-height: 1.7; padding: 3px 0; }
+  .chat-notice .cn-list b { color: var(--text); }
+  .chat-notice .cn-key { display: flex; gap: 8px; }
+  .chat-notice .cn-key input { flex: 1; min-width: 0; background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 12px; color: var(--text); font-size: 16px; font-family: inherit; outline: none; }
+  .chat-notice .cn-key input:focus { border-color: var(--accent); }
   .chat-input-row { display: flex; gap: 10px; margin-top: 10px; }
   .chat-input-row textarea {
     flex: 1; background: var(--bg-soft); border: 1px solid var(--card-border); border-radius: 12px;
@@ -550,6 +559,9 @@
 
     /* iOSで入力時に画面が勝手にズームするのを防止(16px未満だとズームされる) */
     .search-box input, .field input, .field textarea, .chat-input-row textarea, .ai-setup input { font-size: 16px; }
+
+    /* スマホではトーストを上部に(キーボードで隠れないように) */
+    #toast { bottom: auto; top: 60px; }
   }
 
   /* 長い単語・URLでもはみ出さない(全画面共通・無害) */
@@ -625,13 +637,7 @@
   <!-- ========== AI CHAT ========== -->
   <div class="tab-page" id="page-chat">
     <div class="chat-status" id="chat-status"></div>
-    <div id="ai-setup" class="ai-setup" style="display:none">
-      <h4>🔑 AI接続のセットアップ</h4>
-      <p>この環境ではClaude直結(window.claude)が見つかりませんでした。Anthropic APIキーを入れると接続できます(従量課金)。キーは<b>この端末のブラウザ内にのみ</b>保存され、外部には送られません(API呼び出し先はAnthropic公式のみ)。</p>
-      <div class="field"><label>APIキー(sk-ant-...)</label><input type="text" id="ai-key" placeholder="sk-ant-api03-..."></div>
-      <div class="field"><label>モデル</label><input type="text" id="ai-model" value="claude-sonnet-4-5"></div>
-      <button class="btn btn-primary btn-sm" onclick="saveKey()">接続する</button>
-    </div>
+    <div id="ai-setup" class="ai-setup" style="display:none"></div>
     <div class="chat-layout">
       <div class="chat-sessions" id="chat-sessions"></div>
       <div class="chat-main">
@@ -719,7 +725,7 @@
 const GOAL = {
   amountOku: 300,               // 目標額(億円)
   byAge: 30,                    // 期限の年齢
-  birthDate: null,              // "YYYY-MM-DD" をClaudeに伝えるとカウントダウンが動く
+  birthDate: "2009-09-06",      // 16歳・誕生日9/6 → 2009年生まれ。30歳の誕生日=2039-09-06
   definition: "総資産(自社株式の評価額を含む)※仮定義 — korotaの定義を聞いたら更新",
   currentAssetOku: 0            // 現在の資産(億円)。分かったら更新
 };
@@ -1368,7 +1374,7 @@ function ensureChat(){
     chats.unshift(curChat);
   }
 }
-function newChat(){ curChat = null; renderChat(); }
+function newChat(){ curChat = null; const ta = document.getElementById("chat-input"); if (ta) ta.value = ""; renderChat(); toast("＋ 新しい会話をはじめました"); }
 function openChat(id){ curChat = chats.find(c=>c.id===id) || null; renderChat(); }
 
 async function sendChat(){
@@ -1377,8 +1383,11 @@ async function sendChat(){
   const text = ta.value.trim();
   if (!text) return;
   if (aiMode === "none"){
-    toast("先にAI接続のセットアップをしてください(APIキー)");
-    document.getElementById("ai-setup").style.display = "block";
+    // AI未接続:入力を無駄にせず「記録」タブにメモとして保存する
+    entries.push({ id: nextId++, date: todayISO(), title: text.slice(0,24) || "メモ", category: "メモ", tags: ["AIトーク下書き"], content: text, pinned: false });
+    ta.value = "";
+    persist(); renderJournal(); renderDash(); renderChat();
+    toast("💾 AI未接続のため『記録』にメモとして保存しました");
     return;
   }
   ensureChat();
@@ -1418,8 +1427,10 @@ function chatToJournal(){
 }
 
 function saveKey(){
-  const k = document.getElementById("ai-key").value.trim();
-  const m = document.getElementById("ai-model").value.trim() || "claude-sonnet-4-5";
+  const kEl = document.getElementById("ai-key");
+  const k = kEl ? kEl.value.trim() : "";
+  const mEl = document.getElementById("ai-model");
+  const m = (mEl && mEl.value.trim()) || "claude-sonnet-4-5";
   if (!k){ toast("APIキーを入力してください"); return; }
   apiKey = k; aiModel = m;
   if (store){ store.setItem("dreamlog_apikey", k); store.setItem("dreamlog_model", m); }
@@ -1433,7 +1444,7 @@ function renderChat(){
     ? `<span class="cs-pill ok">🤖 AI接続:Claude直結(サブスク内で利用)</span>`
     : aiMode === "apikey"
       ? `<span class="cs-pill ok">🤖 AI接続:APIキー(${esc(aiModel)})</span>`
-      : `<span class="cs-pill warn">🤖 AI未接続 — 下のセットアップへ</span>`;
+      : `<span class="cs-pill warn">🤖 AI未接続(下に接続方法)</span>`;
   const savePill = store
     ? `<span class="cs-pill ok">💾 自動保存:ON(この端末に保存)</span>`
     : `<span class="cs-pill warn">💾 自動保存:この環境では不可 — 会話後に「記録に変換」+JSONコピーで残す</span>`;
@@ -1446,7 +1457,23 @@ function renderChat(){
       : `<div class="sess" style="cursor:default">まだ会話がありません</div>`;
 
   const log = document.getElementById("chat-log");
-  if (!curChat || !curChat.messages.length){
+  if (aiMode === "none"){
+    log.innerHTML = `
+      <div class="chat-notice">
+        <div class="cn-title">🔌 このタブでAIと直接話すには「接続」が必要です</div>
+        <p>スマホやこの公開URLでは、下の①か②が必要です。難しければ<b>③が一番かんたん&無料</b>です。</p>
+        <ol class="cn-list">
+          <li><b>Claudeアプリの中で開く</b> — パソコンのClaudeアプリのサイドバーからDream Logを開くと、設定なしで話せます</li>
+          <li><b>自分のAPIキーをつなぐ</b>(下に入力・従量課金)</li>
+          <li><b>今のClaudeアプリで私に話して「Dream Logに追記して」と言う</b> ← おすすめ</li>
+        </ol>
+        <div class="cn-key">
+          <input type="text" id="ai-key" placeholder="APIキー sk-ant-api03-...">
+          <button class="btn btn-primary btn-sm" onclick="saveKey()">接続</button>
+        </div>
+        <p style="margin-top:10px">💡 <b>送信</b>を押すと、あなたのメッセージは<b>「記録」タブにメモとして保存</b>されます(AI未接続なので返事はつきません)。</p>
+      </div>`;
+  } else if (!curChat || !curChat.messages.length){
     log.innerHTML = `<div class="chat-empty">✦<br>ここでAIと話した内容は、そのままこのアプリに積み上がっていきます。<br>夢の話も、事業の壁打ちも、思いつきも。</div>`;
   } else {
     log.innerHTML = curChat.messages.map(m=>{
